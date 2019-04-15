@@ -1,3 +1,6 @@
+# Config files with tokens
+*.config
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -16,6 +19,8 @@ eggs/
 .eggs/
 lib/
 lib64/
+bin/
+include/
 parts/
 sdist/
 var/
