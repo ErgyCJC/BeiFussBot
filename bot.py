@@ -1,7 +1,7 @@
 import config # bot config
 import settings # user settings
-import requests
 
+import requests
 import telebot
 from telebot.types import Message
 
@@ -34,4 +34,7 @@ def tune(message: Message):
 
 
 def run_bot():
-    bot.polling()
+    if len(settings.load_settings().items()) == 0:
+        settings.initialize_settings()
+
+    bot.polling(none_stop=True, timeout=20)
