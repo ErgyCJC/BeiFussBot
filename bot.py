@@ -6,7 +6,9 @@ import configparser
 import telebot
 from telebot.types import (Message,
                             InlineKeyboardButton,
-                            InlineKeyboardMarkup)
+                            InlineKeyboardMarkup,
+                            KeyboardButton,
+                            ReplyKeyboardMarkup)
 
 
 tokens = config.load_config()
@@ -26,7 +28,7 @@ def send_welcome(message: Message):
 @bot.message_handler(commands=['help'])
 def help(message: Message):
     commands = ['/tune - настройка интересов',
-                '/go [count] - найти места в [count] минутах ходьбы']
+                '/go [minutes] <places> - найти <places> мест в [minutes] минутах ходьбы (кол-во мест не обязательно)']
 
     commands_line = '\n'.join(commands)
     bot.send_message(message.chat.id, commands_line)
@@ -68,6 +70,28 @@ def callback_inline(call):
         msg = call.data[:1].upper() + call.data[1:] + ' теперь {}отслеживаются.'.format(insertion)
         bot.send_message(call.message.chat.id, msg)
 
+
+@bot.message_handler(commands=['go'])
+def go(message: Message):
+    if len(message.text.split()) < 2:
+        bot.send_message(message.chat.id, 'Нужно ввести хотя бы кол-во минут для этой комманды')
+        return
+
+    minutes_count = int(message.text.split()[1])
+    
+    places_count = 15
+    if len(message.text.split()) > 2:
+        places_count = message.text.split()[2]
+
+    keyboard = ReplyKeyboardMarkup(one_time_keyboard=True, row_width=2)
+    keyboard.add(KeyboardButton(text='Конечно! Отправляю свою геолокацию.', request_location=True))
+    keyboard.add(KeyboardButton(text='Нет.'))
+    last_msg = bot.send_message(message.chat.id, 'Поделитесь своим местоположением?', reply_markup=keyboard)
+    bot.register_next_step_handler(last_msg, geo_answer_handler)
+
+@bot.message_handler()
+def geo_answer_handler(message: Message):
+    pass
 
 def run_bot():
     if len(settings.load_settings().items()) == 0:
