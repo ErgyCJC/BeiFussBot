@@ -87,11 +87,22 @@ def go(message: Message):
     keyboard.add(KeyboardButton(text='Конечно! Отправляю свою геолокацию.', request_location=True))
     keyboard.add(KeyboardButton(text='Нет.'))
     last_msg = bot.send_message(message.chat.id, 'Поделитесь своим местоположением?', reply_markup=keyboard)
-    bot.register_next_step_handler(last_msg, geo_answer_handler)
 
-@bot.message_handler()
-def geo_answer_handler(message: Message):
-    pass
+@bot.message_handler(content_types=["location"])
+def location(message):
+    if message.location is not None:
+        print(message.location)
+        print("latitude: %s; longitude: %s" % (message.location.latitude, message.location.longitude))
+
+@bot.message_handler(content_types=['text'])
+def answer_handler(message: Message):
+    if message.text == 'Конечно! Отправляю свою геолокацию.':
+        if message.location is None:
+            bot.send_message(message.chat.id, 'Что-то не то, просто так геолокация не нужна.')
+        else:
+            print(message.location.latitude, message.location.longitude)
+    elif message.text == 'Нет.':
+        bot.send_message(message.chat.id, 'Жаль. В таком случае, ничем не могу помочь.')
 
 def run_bot():
     if len(settings.load_settings().items()) == 0:
