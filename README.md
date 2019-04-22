@@ -1,2 +1,3 @@
 # BeiFussBot
-MIPT Telegram bot for 2nd Python review. Spring 2019
+
+Telegram bot for 2nd Python review. Spring 2019
