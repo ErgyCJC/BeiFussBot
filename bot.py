@@ -13,6 +13,7 @@ from telebot.types import (Message,
 
 tokens = config.load_config()
 bot = telebot.TeleBot(tokens['telegram-token'])
+state_info = {'getting_places' : False, 'walk_minutes' : None, 'obj_count' : None}
 
 
 @bot.message_handler(commands=['start'])
@@ -78,10 +79,12 @@ def go(message: Message):
         return
 
     minutes_count = int(message.text.split()[1])
-    
+    state_info['walk_minutes'] = minutes_count
+
     places_count = 15
     if len(message.text.split()) > 2:
         places_count = message.text.split()[2]
+    state_info['']
 
     keyboard = ReplyKeyboardMarkup(one_time_keyboard=True, row_width=2)
     keyboard.add(KeyboardButton(text='Конечно! Отправляю свою геолокацию.', request_location=True))
@@ -91,8 +94,11 @@ def go(message: Message):
 @bot.message_handler(content_types=["location"])
 def location(message):
     if message.location is not None:
-        print(message.location)
-        print("latitude: %s; longitude: %s" % (message.location.latitude, message.location.longitude))
+        state_info['getting_places'] = True
+        latitude = message.location.latitude
+        longitude = message.location.longitude
+
+        send_places_list()
 
 @bot.message_handler(content_types=['text'])
 def answer_handler(message: Message):
@@ -109,3 +115,9 @@ def run_bot():
         settings.initialize_settings()
 
     bot.polling(none_stop=True, timeout=20)
+
+
+def send_places_list():
+    base_url = 'http://www.mapquestapi.com/search/v2/radius?key={}'.format(tokens[' = xurAgU3ftOkUyxAkxne0XteyCWBCsQfzw'])
+    radius = '&radius={}wmin'.format(state_info['walk_minutes'])
+    obj_count = '&maxMatches={}'
