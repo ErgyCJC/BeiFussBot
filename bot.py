@@ -18,7 +18,6 @@ class GoCommandInfo:
 
 tokens = config.load_config()
 bot = telebot.TeleBot(tokens['telegram-token'])
-# state_info = {'getting_places' : False, 'walk_minutes' : None, 'obj_count' : None}
 go_info = dict()
 
 
@@ -93,7 +92,6 @@ def go(message: Message):
         return
 
     minutes_count = int(message.text.split()[1])
-    # state_info['walk_minutes'] = minutes_count
     go_info[message.chat.id].minutes = minutes_count
 
     places_count = 15
@@ -102,7 +100,6 @@ def go(message: Message):
             places_count = int(message.text.split()[2])
         except Exception:
             pass
-    # state_info['obj_count'] = places_count
     go_info[message.chat.id].obj_count = places_count
 
     keyboard = ReplyKeyboardMarkup(one_time_keyboard=True, row_width=2)
@@ -113,7 +110,6 @@ def go(message: Message):
 @bot.message_handler(content_types=["location"])
 def location(message: Message):
     if message.location is not None:
-        # state_info['getting_places'] = True
         latitude = message.location.latitude
         longitude = message.location.longitude
 

@@ -10,17 +10,17 @@ def load_settings(file: str = 'settings.config', section: str = 'SETTINGS') -> d
     return dict()
 
 
-def initialize_settings(settings_file: str = 'settings.config', section: str = 'SETTINGS') -> None:
+def default_settings(settings_file: str = 'settings.config', section: str = 'SETTINGS') -> None:
     settings = configparser.ConfigParser()
 
-    default_keys = ['Кафе',
-                    'Рестораны',
-                    'Памятники',
-                    'Музеи',
-                    'Библиотеки',
-                    'Ипподромы',
-                    'Парки развлечений',
-                    'Зоопарки']
+    default_keys = ['кафе',
+                    'рестораны',
+                    'памятники',
+                    'музеи',
+                    'библиотеки',
+                    'ипподромы',
+                    'парки развлечений',
+                    'зоопарки']
     default_values = [False for x in range(len(default_keys))]
     settings[section] = dict(zip(default_keys, default_values))
 
