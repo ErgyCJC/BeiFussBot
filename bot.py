@@ -1,5 +1,6 @@
 import config # bot config
 import settings # user settings
+import phrases
 
 import requests
 import random
@@ -31,9 +32,9 @@ go_info = dict()
 def send_welcome(message: Message):
     """ Сообщение при старте бота """
 
-    lines = ['Привет! Это бот для поиска интересных мест в шаговой доступности',
+    lines = ('Привет! Это бот для поиска интересных мест в шаговой доступности',
                 '/tune - настройка интересов',
-                '/go [count] - найти места в [count] минутах ходьбы']
+                '/go [count] - найти места в [count] минутах ходьбы')
 
     welcome_line = '\n'.join(lines)
     bot.send_message(message.chat.id, welcome_line)
@@ -43,8 +44,8 @@ def send_welcome(message: Message):
 def help(message: Message):
     """ Сообщение на команду /help """
 
-    commands = ['/tune - настройка интересов',
-                '/go [minutes] <places> - найти <places> мест в [minutes] минутах ходьбы (кол-во мест не обязательно)']
+    commands = ('/tune - настройка интересов',
+                '/go [minutes] <places> - найти <places> мест в [minutes] минутах ходьбы (кол-во мест не обязательно)')
 
     commands_line = '\n'.join(commands)
     bot.send_message(message.chat.id, commands_line)
@@ -72,7 +73,7 @@ def tune(message: Message):
         callback_msg = category + ',' + str(message.chat.id)
         keyboard.add(InlineKeyboardButton(text=button_text, callback_data=callback_msg))
 
-    bot.send_message(message.chat.id, 'Выберите интересные для вас места:', reply_markup=keyboard)
+    bot.send_message(message.chat.id, RusPhrases.choose_places, reply_markup=keyboard)
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -96,8 +97,8 @@ def callback_inline(call):
 
         insertion = ''
         if user_settings[place_category] == 'False':
-            insertion = 'не '
-        msg = place_category[:1].upper() + place_category[1:] + ' теперь {}отслеживаются.'.format(insertion)
+            insertion = RusPhrases.negative_prefix
+        msg = RusPhrases.following.format(place_category[:1].upper(), place_category[1:], insertion)
         bot.send_message(call.message.chat.id, msg)
 
 
@@ -109,7 +110,7 @@ def go(message: Message):
 
     # У команды нет аргументов
     if len(message.text.split()) < 2:
-        bot.send_message(message.chat.id, 'Нужно ввести хотя бы кол-во минут для этой комманды')
+        bot.send_message(message.chat.id, RusPhrases.go_cmd_no_args)
         return
 
     minutes_count = int(message.text.split()[1])
@@ -126,9 +127,9 @@ def go(message: Message):
 
     # Клавиатура запроса геолокации
     keyboard = ReplyKeyboardMarkup(one_time_keyboard=True, row_width=2)
-    keyboard.add(KeyboardButton(text='Конечно! Отправляю свою геолокацию.', request_location=True))
-    keyboard.add(KeyboardButton(text='Нет.'))
-    last_msg = bot.send_message(message.chat.id, 'Поделитесь своим местоположением?', reply_markup=keyboard)
+    keyboard.add(KeyboardButton(text=RusPhrases.sending_geolocation, request_location=True))
+    keyboard.add(KeyboardButton(text=RusPhrases.no_answer))
+    last_msg = bot.send_message(message.chat.id, RusPhrases.geolocation_request, reply_markup=keyboard)
 
 @bot.message_handler(content_types=["location"])
 def location(message: Message):
@@ -144,7 +145,7 @@ def location(message: Message):
 def answer_handler(message: Message):
     """ Обработка постороннних сообщений """
 
-    bot.send_message(message.chat.id, 'Воспользуйтесь, пожалуйста, командой.')
+    bot.send_message(message.chat.id, RusPhrases.undefined_cmd)
     help(message)
 
 
@@ -172,7 +173,7 @@ def send_places_list(latitude, longitude, message:Message):
     # Запрос по каждой категории мест
     for category, code in dict(codes_config[section]).items():
         # Категория не отслеживается для данного пользователя
-        if user_settings[category] is 'False':
+        if user_settings[category] == 'False':
             continue
 
         code_option = '&hostedData=mqap.ntpois|group_sic_code=?|{}'.format(code)
@@ -193,8 +194,8 @@ def send_places_list(latitude, longitude, message:Message):
         place = places[index]
         result_msg += 'Название: {}\nАдрес: {}\n\n'.format(place['name'], place['adress'])
 
-    if result_msg is '':
-        result_msg = 'К сожалению, в округе ничего не найдено.'
+    if result_msg == '':
+        result_msg = RusPhrases.no_places_found
     bot.send_message(message.chat.id, result_msg)
 
 
